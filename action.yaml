@@ -3,6 +3,7 @@ description: 'Attach next open milestone to a merged PR'
 
 runs:
   using: "composite"
+  if: github.event.pull_request.merged
   steps:
     - name: Get PR number
       id: pr
@@ -21,6 +22,6 @@ runs:
 
     - name: Attach milestone to PR
       env:
-        GH_TOKEN: ${{ inputs.token }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         python set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
