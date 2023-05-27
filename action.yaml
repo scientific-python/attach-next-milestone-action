@@ -1,0 +1,26 @@
+name: 'Attach next milestone'
+description: 'Attach next open milestone to a merged PR'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get PR number
+      id: pr
+      run: >-
+        echo "::set-env name=PR::$(
+          jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH"
+        )"
+
+    - name: Get next milestone
+      id: milestone
+      run: >-
+        python -m pip install requests ;
+        echo "::set-env name=MILESTONE::$(
+          python next-milestone.py $GITHUB_REPOSITORY
+        )"
+
+    - name: Attach milestone to PR
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      run: |
+        python set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
