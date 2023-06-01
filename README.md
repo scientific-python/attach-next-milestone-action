@@ -29,7 +29,7 @@ To use the above, you will need to set a repository secret
 `MILESTONE_LABELER_TOKEN` to a [fine-grained access token](https://github.blog/2022-10-18-introducing-fine-grained-personal-access-tokens-for-github/)
 that has permissions to modify PRs.
 If you are generating a token for your org, you first need to enable fine-grained access tokens at
-``.
+`https://github.com/organizations/<YOUR-ORGANIZATION>/settings/personal-access-tokens-onboarding`.
 
 You can generate the token itself at https://github.com/settings/apps.
 
