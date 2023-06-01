@@ -23,7 +23,7 @@ runs:
       run: >-
         python -m pip install requests ;
         echo "MILESTONE=$(
-          python next-milestone.py $GITHUB_REPOSITORY
+          python ${{ github.action_path }}/next-milestone.py $GITHUB_REPOSITORY
         )" >> $GITHUB_ENV
 
     - name: Attach milestone to PR
@@ -31,4 +31,4 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
       shell: bash
       run: |
-        python set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
+        python ${{ github.action_path }}/set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
