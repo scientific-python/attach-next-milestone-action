@@ -13,18 +13,18 @@ runs:
       id: pr
       shell: bash
       run: >-
-        echo "::set-env name=PR::$(
+        echo "PR=$(
           jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH"
-        )"
+        )" >> $GITHUB_ENV
 
     - name: Get next milestone
       id: milestone
       shell: bash
       run: >-
         python -m pip install requests ;
-        echo "::set-env name=MILESTONE::$(
+        echo "MILESTONE=$(
           python next-milestone.py $GITHUB_REPOSITORY
-        )"
+        )" >> $GITHUB_ENV
 
     - name: Attach milestone to PR
       env:
