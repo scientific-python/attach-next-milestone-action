@@ -1,6 +1,7 @@
 import os
 import requests
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument('owner_repo')
@@ -21,11 +22,11 @@ headers = {
 response = requests.get(query_url)
 
 if not response.json()["merged"]:
-    print("PR was closed without being merged; not attaching milestone")
+    print("\nPR was closed without being merged; not attaching milestone\n")
     sys.exit(0)
 
 response = requests.patch(
-    url,
+    patch_url,
     json={"milestone": int(args.milestone_nr)},
     headers=headers
 )
