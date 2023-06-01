@@ -10,11 +10,19 @@ args = parser.parse_args()
 
 owner, repo = args.owner_repo.split('/')
 
-url = f"https://api.github.com/repos/{owner}/{repo}/issues/{args.pr}"
+query_url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{args.pr}"
+patch_url = f"https://api.github.com/repos/{owner}/{repo}/issues/{args.pr}"
+
 headers = {
     "Accept": "application/vnd.github.v3+json",
     "Authorization": f"token {os.environ['GH_TOKEN']}",
 }
+
+response = requests.get(query_url)
+
+if not response.json()["merged"]:
+    print("PR was closed without being merged; not attaching milestone")
+    sys.exit(0)
 
 response = requests.patch(
     url,

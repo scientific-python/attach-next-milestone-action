@@ -1,12 +1,17 @@
 name: 'Attach next milestone'
 description: 'Attach next open milestone to a merged PR'
 
+inputs:
+  token:
+    description: 'A Github personal authentication token'
+    required: true
+
 runs:
   using: "composite"
-  if: github.event.pull_request.merged
   steps:
     - name: Get PR number
       id: pr
+      shell: bash
       run: >-
         echo "::set-env name=PR::$(
           jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH"
@@ -14,6 +19,7 @@ runs:
 
     - name: Get next milestone
       id: milestone
+      shell: bash
       run: >-
         python -m pip install requests ;
         echo "::set-env name=MILESTONE::$(
@@ -22,6 +28,7 @@ runs:
 
     - name: Attach milestone to PR
       env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
       run: |
         python set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
