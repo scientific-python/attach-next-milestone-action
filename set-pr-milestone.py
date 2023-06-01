@@ -22,7 +22,7 @@ headers = {
 response = requests.get(query_url)
 
 if not response.json()["merged"]:
-    print("\nPR was closed without being merged; not attaching milestone\n")
+    print("\nPR was closed without being merged; not attaching milestone")
     sys.exit(0)
 
 response = requests.patch(
