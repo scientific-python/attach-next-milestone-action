@@ -1,5 +1,6 @@
 import requests
 import argparse
+from packaging.version import Version
 
 parser = argparse.ArgumentParser()
 parser.add_argument('owner_repo')
@@ -11,6 +12,6 @@ owner, repo = args.owner_repo.split('/')
 milestones_url = f'https://api.github.com/repos/{owner}/{repo}/milestones'
 response = requests.get(milestones_url)
 milestones = response.json()
-milestones = sorted(milestones, key=lambda x: x['title'])
+milestones = sorted(milestones, key=lambda x: Version(x['title']))
 
 print(milestones[0]['number'])
