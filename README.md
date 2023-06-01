@@ -8,17 +8,19 @@ A typical job would look like this:
 ```yaml
 # .github/workflows/milestone-merged-prs.yaml
 
+name: Milestone
+
 on:
-  pull_request:
+  pull_request_target:
     types:
       - closed
 
 jobs:
   milestone_pr:
-    name: Milestone PR
+    name: attach to PR
     runs-on: ubuntu-latest
     steps:
-      - uses: stefanv/attach-next-milestone@main
+      - uses: scientific-python/attach-next-milestone@main
         with:
           token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
 ```
@@ -43,3 +45,10 @@ Copy the token, and navigate to your code repository. Under Settings
 -> Secrets and variables -> Actions, add a repository secret named
 `MILESTONE_LABELER_TOKEN`, and set its contents to the generated
 token.
+
+## Warning!
+
+The workflow above runs as `pull_request_target`, meaning it has access to repository secrets.
+This is not usually a problem, since our action does nothing but attach a milestone to a PR using the provided token.
+But, you should **not add further commands to the workflow**, such as checking out the PR and executing code from it.
+If you do that, PR authors can gain access to your secrets.
