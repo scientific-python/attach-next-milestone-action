@@ -3,6 +3,9 @@
 This action attaches the next open milestone to a given PR, if that PR
 was merged.
 
+Currently, this action only looks at milestones that can be parsed as
+version numbers.
+
 A typical job would look like this:
 
 ```yaml
