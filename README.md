@@ -1,7 +1,6 @@
 # Attach Next Milestone
 
-This action attaches the next open milestone to a given PR, if that PR
-was merged.
+This action attaches the next open milestone to merged PRs.
 
 Currently, this action only looks at milestones that can be parsed as
 version numbers.
