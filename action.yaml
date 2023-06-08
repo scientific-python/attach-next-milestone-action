@@ -5,6 +5,9 @@ inputs:
   token:
     description: 'A Github personal authentication token'
     required: true
+  force:
+    description: 'Whether or not to overwrite existing milestones'
+    default: false
 
 runs:
   using: "composite"
@@ -29,6 +32,10 @@ runs:
     - name: Attach milestone to PR
       env:
         GH_TOKEN: ${{ inputs.token }}
+        FORCE: ${{ inputs.force }}
       shell: bash
-      run: |
-        python ${{ github.action_path }}/set-pr-milestone.py $GITHUB_REPOSITORY $PR $MILESTONE
+      run: >-
+        if [[ $FORCE == true ]]; then
+          export FLAGS="--force";
+        fi;
+        python ${{ github.action_path }}/set-pr-milestone.py $FLAGS $GITHUB_REPOSITORY $PR $MILESTONE

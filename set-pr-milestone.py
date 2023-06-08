@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('owner_repo')
 parser.add_argument('pr')
 parser.add_argument('milestone_nr')
+parser.add_argument('--force', action='store_true')
 args = parser.parse_args()
 
 owner, repo = args.owner_repo.split('/')
@@ -19,10 +20,18 @@ headers = {
     "Authorization": f"token {os.environ['GH_TOKEN']}",
 }
 
-response = requests.get(query_url)
+response = requests.get(query_url).json()
 
-if not response.json()["merged"]:
-    print("\nPR was closed without being merged; not attaching milestone")
+if response.get("message") == "Not Found":
+    print(f"Error: PR {args.pr} not found on {args.owner_repo}")
+    sys.exit(1)
+
+if response["milestone"] and not args.force:
+    print("PR already has a milestone; exiting")
+    sys.exit(0)
+
+if not response["merged"]:
+    print("PR hasn't been merged; not attaching milestone")
     sys.exit(0)
 
 response = requests.patch(
@@ -33,3 +42,5 @@ response = requests.patch(
 
 # Check for errors
 response.raise_for_status()
+
+print(f"Milestone set on {args.owner_repo} #{args.pr}")

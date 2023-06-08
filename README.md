@@ -48,6 +48,12 @@ Copy the token, and navigate to your code repository. Under Settings
 `MILESTONE_LABELER_TOKEN`, and set its contents to the generated
 token.
 
+## Options
+
+In the `with` clause, the following options are available:
+
+- `force: true` : Overwrite existing milestones.
+
 ## Warning!
 
 The workflow above runs as `pull_request_target`, meaning it has access to repository secrets.
