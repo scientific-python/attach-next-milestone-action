@@ -1,4 +1,4 @@
-# Attach Next Milestone
+# Attach Next Milestone Action
 
 This action attaches the next open milestone to merged PRs.
 
@@ -22,7 +22,7 @@ jobs:
     name: attach to PR
     runs-on: ubuntu-latest
     steps:
-      - uses: scientific-python/attach-next-milestone@main
+      - uses: scientific-python/attach-next-milestone-action@v0.1.0
         with:
           token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
 ```
