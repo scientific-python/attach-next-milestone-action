@@ -22,9 +22,10 @@ on:
 jobs:
   milestone_pr:
     name: attach to PR
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
-      - uses: scientific-python/attach-next-milestone-action@v0.1.0
+      - uses: scientific-python/attach-next-milestone-action@a4889cfde7d2578c1bc7400480d93910d2dd34f6
         with:
           token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
 ```
