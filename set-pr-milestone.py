@@ -16,8 +16,9 @@ query_url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{args.pr}"
 patch_url = f"https://api.github.com/repos/{owner}/{repo}/issues/{args.pr}"
 
 headers = {
-    "Accept": "application/vnd.github.v3+json",
-    "Authorization": f"token {os.environ['GH_TOKEN']}",
+    "Accept": "application/vnd.github+json",
+    "Authorization": f"Bearer {os.environ['GH_TOKEN']}",
+    "X-GitHub-Api-Version": "2022-11-28"
 }
 
 response = requests.get(query_url).json()
@@ -42,5 +43,9 @@ response = requests.patch(
 
 # Check for errors
 response.raise_for_status()
+
+if response.json()['milestone'] is None:
+    print("ERROR: could not set milestone")
+    sys.exit(1)
 
 print(f"Milestone set on {args.owner_repo} #{args.pr}")
