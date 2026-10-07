@@ -3,7 +3,7 @@ description: 'Attach next open milestone to a merged PR'
 
 inputs:
   token:
-    description: 'A GitHub token with issues: write and pull-requests: read'
+    description: 'A GitHub token with issues: write and pull-requests: write'
     required: true
   force:
     description: 'Whether or not to overwrite existing milestones'
@@ -37,7 +37,7 @@ runs:
             if: github.repository == 'OWNER/REPOSITORY'
             permissions:
               issues: write
-              pull-requests: read
+              pull-requests: write
         \`\`\`
 
         Use \`token: \${{ github.token }}\`. You can delete the \`MILESTONE_LABELER_TOKEN\` secret.

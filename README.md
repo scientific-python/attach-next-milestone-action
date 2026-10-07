@@ -28,7 +28,7 @@ jobs:
 
     permissions:
       issues: write
-      pull-requests: read
+      pull-requests: write
 
     steps:
       - uses: scientific-python/attach-next-milestone-action@a4889cfde7d2578c1bc7400480d93910d2dd34f6
@@ -54,7 +54,7 @@ In the `with` clause, the following options are available:
 The workflow runs on `push`, so it executes only code that is already on your main branch.
 It does not need `pull_request_target`, and it does not run code from pull requests.
 
-The example grants `GITHUB_TOKEN` only the permissions needed to read pull requests and update milestones.
+The example grants `GITHUB_TOKEN` only the permissions needed to set milestones on pull requests.
 No manually created token or repository secret is required.
 
 ## Migrating from `pull_request_target`
