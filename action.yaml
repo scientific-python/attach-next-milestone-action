@@ -3,7 +3,7 @@ description: 'Attach next open milestone to a merged PR'
 
 inputs:
   token:
-    description: 'A Github personal authentication token'
+    description: 'A GitHub token with issues: write and pull-requests: read'
     required: true
   force:
     description: 'Whether or not to overwrite existing milestones'
@@ -12,30 +12,80 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Get PR number
-      id: pr
+    - name: Check trigger
       shell: bash
-      run: >-
-        echo "PR=$(
-          jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH"
-        )" >> $GITHUB_ENV
+      run: |
+        if [[ "$GITHUB_EVENT_NAME" != "push" ]]; then
+          readme="https://github.com/scientific-python/attach-next-milestone-action#migrating-from-pull_request_target"
+          echo "::error title=Unsupported trigger '$GITHUB_EVENT_NAME'::This action runs on 'push' to your main branch. See $readme"
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+        ## attach-next-milestone: change your workflow trigger
+
+        This action does not support \`$GITHUB_EVENT_NAME\`. Replace the \`on:\` block and set permissions:
+
+        \`\`\`yaml
+        on:
+          push:
+            branches:
+              - 'main'
+
+        permissions: {}
+
+        jobs:
+          milestone_pr:
+            # Replace OWNER/REPOSITORY with your repository
+            if: github.repository == 'OWNER/REPOSITORY'
+            permissions:
+              issues: write
+              pull-requests: read
+        \`\`\`
+
+        Use \`token: \${{ github.token }}\`. You can delete the \`MILESTONE_LABELER_TOKEN\` secret.
+
+        Details: $readme
+        EOF
+          exit 1
+        fi
+
+    - name: Get merged PR
+      id: pr
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+      shell: bash
+      run: |
+        pr=$(
+          gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+            --jq '[.[] | select(.merged_at != null and .base.ref == env.GITHUB_REF_NAME)][0].number // empty'
+        )
+        if [[ -z "$pr" ]]; then
+          echo "::notice::No merged PR found for $GITHUB_SHA; nothing to do"
+        fi
+        echo "number=$pr" >> "$GITHUB_OUTPUT"
 
     - name: Get next milestone
       id: milestone
+      if: steps.pr.outputs.number != ''
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        ACTION_PATH: ${{ github.action_path }}
       shell: bash
       run: >-
         python -m pip install requests packaging ;
-        echo "MILESTONE=$(
-          python ${{ github.action_path }}/next-milestone.py $GITHUB_REPOSITORY
-        )" >> $GITHUB_ENV
+        echo "number=$(
+          python "$ACTION_PATH/next-milestone.py" "$GITHUB_REPOSITORY"
+        )" >> "$GITHUB_OUTPUT"
 
     - name: Attach milestone to PR
+      if: steps.pr.outputs.number != ''
       env:
+        PR: ${{ steps.pr.outputs.number }}
+        MILESTONE: ${{ steps.milestone.outputs.number }}
         GH_TOKEN: ${{ inputs.token }}
         FORCE: ${{ inputs.force }}
+        ACTION_PATH: ${{ github.action_path }}
       shell: bash
       run: >-
         if [[ $FORCE == true ]]; then
           export FLAGS="--force";
         fi;
-        python ${{ github.action_path }}/set-pr-milestone.py $FLAGS $GITHUB_REPOSITORY $PR $MILESTONE
+        python "$ACTION_PATH/set-pr-milestone.py" $FLAGS "$GITHUB_REPOSITORY" "$PR" "$MILESTONE"

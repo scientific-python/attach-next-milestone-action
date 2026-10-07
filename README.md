@@ -13,45 +13,35 @@ A typical job would look like this:
 name: Milestone
 
 on:
-  pull_request_target:
-    types:
-      - closed
+  push:
     branches:
       - 'main'
+
+permissions: {}
 
 jobs:
   milestone_pr:
     name: attach to PR
-    if: github.event.pull_request.merged == true
+    # Replace OWNER/REPOSITORY with your repository, e.g. scikit-image/scikit-image
+    if: github.repository == 'OWNER/REPOSITORY'
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: read
+
     steps:
       - uses: scientific-python/attach-next-milestone-action@a4889cfde7d2578c1bc7400480d93910d2dd34f6
         with:
-          token: ${{ secrets.MILESTONE_LABELER_TOKEN }}
+          token: ${{ github.token }}
 ```
 
-To use the above, you will need to set a repository secret
-`MILESTONE_LABELER_TOKEN` to a [fine-grained access token](https://github.blog/2022-10-18-introducing-fine-grained-personal-access-tokens-for-github/)
-that has *read & write* permissions to modify *both* issues and PRs.
-If you are generating a token for your org, you first need to enable fine-grained access tokens at
-`https://github.com/organizations/<YOUR-ORGANIZATION>/settings/personal-access-tokens-onboarding`.
+Replace `OWNER/REPOSITORY` with the name of your repository.
+This condition stops the workflow from running in forks.
+If you do not replace it, the job is always skipped.
 
-You can generate the token itself at https://github.com/settings/apps.
-
-1. Personal access tokens -> Fine-grained tokens. Generate new token. Token name: milestone-labeler-token.
-2. Select the org which owns the code repository.
-   If you don't see your organization listed, you first need to
-   [onboard it](https://github.com/organizations/<YOUR_ORG_NAME>/settings/personal-access-tokens-onboarding).
-3. Choose "Only Select Repositories", and choose the correct one.
-4. Permissions:
-   - Repository Permissions -> Pull Requests -> Read and write.
-   - Repository Permissions -> Issues -> Read and write.
-6. Generate the token. If an error appears saying "Sorry, something went wrong", ignore it.
-
-Copy the token, and navigate to your code repository. Under Settings
--> Secrets and variables -> Actions, add a repository secret named
-`MILESTONE_LABELER_TOKEN`, and set its contents to the generated
-token.
+The action finds the merged PR that belongs to the pushed commit.
+Pushes without a merged PR, such as direct commits to `main`, are skipped.
 
 ## Options
 
@@ -59,9 +49,24 @@ In the `with` clause, the following options are available:
 
 - `force: true` : Overwrite existing milestones.
 
-## Warning!
+## Security
 
-The workflow above runs as `pull_request_target`, meaning it has access to repository secrets.
-This is not usually a problem, since our action does nothing but attach a milestone to a PR using the provided token.
-But, you should **not add further commands to the workflow**, such as checking out the PR and executing code from it.
-If you do that, PR authors can gain access to your secrets.
+The workflow runs on `push`, so it executes only code that is already on your main branch.
+It does not need `pull_request_target`, and it does not run code from pull requests.
+
+The example grants `GITHUB_TOKEN` only the permissions needed to read pull requests and update milestones.
+No manually created token or repository secret is required.
+
+## Migrating from `pull_request_target`
+
+Earlier versions of this action ran on `pull_request_target` with a personal access token.
+This version fails on any trigger other than `push`.
+
+To migrate:
+
+1. Replace the `on:` block with the `push` trigger from the example above.
+2. Set the job's `if:` to `github.repository == 'OWNER/REPOSITORY'`, with your repository name.
+   Remove `github.event.pull_request.merged == true`.
+3. Add the `permissions` blocks from the example.
+4. Set `token: ${{ github.token }}`.
+5. Delete the `MILESTONE_LABELER_TOKEN` repository secret.
