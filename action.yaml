@@ -33,6 +33,8 @@ runs:
 
         jobs:
           milestone_pr:
+            # Replace OWNER/REPOSITORY with your repository
+            if: github.repository == 'OWNER/REPOSITORY'
             permissions:
               issues: write
               pull-requests: read

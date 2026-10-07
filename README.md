@@ -22,6 +22,7 @@ permissions: {}
 jobs:
   milestone_pr:
     name: attach to PR
+    # Replace OWNER/REPOSITORY with your repository, e.g. scientific-python/spin
     if: github.repository == 'OWNER/REPOSITORY'
     runs-on: ubuntu-latest
 
@@ -34,6 +35,10 @@ jobs:
         with:
           token: ${{ github.token }}
 ```
+
+Replace `OWNER/REPOSITORY` with the name of your repository.
+This condition stops the workflow from running in forks.
+If you do not replace it, the job is always skipped.
 
 The action finds the merged PR that belongs to the pushed commit.
 Pushes without a merged PR, such as direct commits to `main`, are skipped.
@@ -60,7 +65,8 @@ This version fails on any trigger other than `push`.
 To migrate:
 
 1. Replace the `on:` block with the `push` trigger from the example above.
-2. Remove `github.event.pull_request.merged == true` from the job's `if:`.
+2. Set the job's `if:` to `github.repository == 'OWNER/REPOSITORY'`, with your repository name.
+   Remove `github.event.pull_request.merged == true`.
 3. Add the `permissions` blocks from the example.
 4. Set `token: ${{ github.token }}`.
 5. Delete the `MILESTONE_LABELER_TOKEN` repository secret.
