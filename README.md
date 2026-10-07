@@ -12,12 +12,8 @@ A typical job would look like this:
 
 name: Milestone
 
-# Required to update merged PRs originating from forks.
-# This workflow must never check out or execute PR-controlled code.
-on: # zizmor: ignore[dangerous-triggers]
-  pull_request_target:
-    types:
-      - closed
+on:
+  push:
     branches:
       - 'main'
 
@@ -26,9 +22,7 @@ permissions: {}
 jobs:
   milestone_pr:
     name: attach to PR
-    if: >-
-      github.repository == 'OWNER/REPOSITORY' &&
-      github.event.pull_request.merged == true
+    if: github.repository == 'OWNER/REPOSITORY'
     runs-on: ubuntu-latest
 
     permissions:
@@ -41,6 +35,9 @@ jobs:
           token: ${{ github.token }}
 ```
 
+The action finds the merged PR that belongs to the pushed commit.
+Pushes without a merged PR, such as direct commits to `main`, are skipped.
+
 ## Options
 
 In the `with` clause, the following options are available:
@@ -49,12 +46,21 @@ In the `with` clause, the following options are available:
 
 ## Security
 
-This workflow uses `pull_request_target` to update merged pull requests from forks.
-It runs in the base repository's context, where it can receive a write-capable `GITHUB_TOKEN` and access explicitly referenced repository or organization secrets.
+The workflow runs on `push`, so it executes only code that is already on your main branch.
+It does not need `pull_request_target`, and it does not run code from pull requests.
 
 The example grants `GITHUB_TOKEN` only the permissions needed to read pull requests and update milestones.
 No manually created token or repository secret is required.
 
-Do not check out, build, test, import, or otherwise execute code from the pull request.
-Doing so could give the pull request author access to the workflow's token or referenced secrets.
-Use only trusted actions that operate on pull request metadata.
+## Migrating from `pull_request_target`
+
+Earlier versions of this action ran on `pull_request_target` with a personal access token.
+This version fails on any trigger other than `push`.
+
+To migrate:
+
+1. Replace the `on:` block with the `push` trigger from the example above.
+2. Remove `github.event.pull_request.merged == true` from the job's `if:`.
+3. Add the `permissions` blocks from the example.
+4. Set `token: ${{ github.token }}`.
+5. Delete the `MILESTONE_LABELER_TOKEN` repository secret.
