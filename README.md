@@ -12,18 +12,30 @@ A typical job would look like this:
 
 name: Milestone
 
-on:
+# Required to update merged PRs originating from forks.
+# This workflow must never check out or execute PR-controlled code.
+on: # zizmor: ignore[dangerous-triggers]
   pull_request_target:
     types:
       - closed
     branches:
       - 'main'
 
+permissions: {}
+
 jobs:
   milestone_pr:
     name: attach to PR
-    if: github.event.pull_request.merged == true
+    if: >-
+      github.repository == 'OWNER/REPOSITORY' &&
+      github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+
     steps:
       - uses: scientific-python/attach-next-milestone-action@a4889cfde7d2578c1bc7400480d93910d2dd34f6
         with:
