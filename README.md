@@ -31,10 +31,12 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: scientific-python/attach-next-milestone-action@a4889cfde7d2578c1bc7400480d93910d2dd34f6
+      - uses: scientific-python/attach-next-milestone-action@v1
         with:
           token: ${{ github.token }}
 ```
+
+To pin the action, replace `v1` with the commit hash of a release.
 
 Replace `OWNER/REPOSITORY` with the name of your repository.
 This condition stops the workflow from running in forks.
