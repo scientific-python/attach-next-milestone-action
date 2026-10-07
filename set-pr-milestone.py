@@ -20,7 +20,7 @@ headers = {
     "Authorization": f"token {os.environ['GH_TOKEN']}",
 }
 
-response = requests.get(query_url).json()
+response = requests.get(query_url, headers=headers).json()
 
 if response.get("message") == "Not Found":
     print(f"Error: PR {args.pr} not found on {args.owner_repo}")

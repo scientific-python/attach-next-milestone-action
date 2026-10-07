@@ -1,3 +1,4 @@
+import os
 import requests
 import argparse
 from packaging.version import Version, InvalidVersion
@@ -19,7 +20,11 @@ def is_version(v):
 
 # Get the list of milestones for the repository
 milestones_url = f'https://api.github.com/repos/{owner}/{repo}/milestones'
-response = requests.get(milestones_url)
+headers = {
+    "Accept": "application/vnd.github.v3+json",
+    "Authorization": f"token {os.environ['GH_TOKEN']}",
+}
+response = requests.get(milestones_url, headers=headers)
 milestones = response.json()
 milestones = [m for m in milestones if is_version(m['title'])]
 milestones = sorted(milestones, key=lambda x: Version(x['title']))
