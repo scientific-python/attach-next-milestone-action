@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   milestone_pr:
     name: attach to PR
-    # Replace OWNER/REPOSITORY with your repository, e.g. scientific-python/spin
+    # Replace OWNER/REPOSITORY with your repository, e.g. scikit-image/scikit-image
     if: github.repository == 'OWNER/REPOSITORY'
     runs-on: ubuntu-latest
 
